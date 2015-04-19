@@ -156,29 +156,36 @@ encoded_mrz(const char *in, size_t len)
 
     check(in, "Invalid arguments");
 
-    /* Parse MRZ */
-    check((len >= MRZ_SERIALNUMBER_OFF + MRZ_SERIALNUMBER_LEN
-            && len >= MRZ_DATEOFBIRTH_OFF + MRZ_DATEOFBIRTH_LEN
-            && len >= MRZ_DATEOFEXPIRY_OFF + MRZ_DATEOFEXPIRY_LEN),
-           "Invalid data");
+    if (len != (MRZ_SERIALNUMBER_LEN + MRZ_DATEOFBIRTH_LEN + MRZ_DATEOFEXPIRY_LEN)) {
 
-    serial = in + MRZ_SERIALNUMBER_OFF;
-    dob = in + MRZ_DATEOFBIRTH_OFF;
-    doe = in + MRZ_DATEOFEXPIRY_OFF;
+		/* Parse MRZ */
+		check((len >= MRZ_SERIALNUMBER_OFF + MRZ_SERIALNUMBER_LEN
+				&& len >= MRZ_DATEOFBIRTH_OFF + MRZ_DATEOFBIRTH_LEN
+				&& len >= MRZ_DATEOFEXPIRY_OFF + MRZ_DATEOFEXPIRY_LEN),
+			   "Invalid data");
+
+		serial = in + MRZ_SERIALNUMBER_OFF;
+		dob = in + MRZ_DATEOFBIRTH_OFF;
+		doe = in + MRZ_DATEOFEXPIRY_OFF;
+    }
 
     /* Concatenate Serial Number || Date of Birth || Date of Expiry */
     cat = BUF_MEM_create(MRZ_SERIALNUMBER_LEN + MRZ_DATEOFBIRTH_LEN +
             MRZ_DATEOFEXPIRY_LEN);
     if (!cat)
         goto err;
-    /* Flawfinder: ignore */
-    memcpy(cat->data, serial, MRZ_SERIALNUMBER_LEN);
-    /* Flawfinder: ignore */
-    memcpy(cat->data + MRZ_SERIALNUMBER_LEN, dob, MRZ_DATEOFBIRTH_LEN);
-    /* Flawfinder: ignore */
-    memcpy(cat->data + MRZ_SERIALNUMBER_LEN + MRZ_DATEOFBIRTH_LEN,
-            doe, MRZ_DATEOFEXPIRY_LEN);
 
+    if (len != (MRZ_SERIALNUMBER_LEN + MRZ_DATEOFBIRTH_LEN + MRZ_DATEOFEXPIRY_LEN)) {
+		/* Flawfinder: ignore */
+		memcpy(cat->data, serial, MRZ_SERIALNUMBER_LEN);
+		/* Flawfinder: ignore */
+		memcpy(cat->data + MRZ_SERIALNUMBER_LEN, dob, MRZ_DATEOFBIRTH_LEN);
+		/* Flawfinder: ignore */
+		memcpy(cat->data + MRZ_SERIALNUMBER_LEN + MRZ_DATEOFBIRTH_LEN,
+				doe, MRZ_DATEOFEXPIRY_LEN);
+    } else {
+		memcpy(cat->data, in, len);
+    }
     /* Compute and output SHA1 hash of concatenation */
     out = hash(EVP_sha1(), NULL, NULL, cat);
 
