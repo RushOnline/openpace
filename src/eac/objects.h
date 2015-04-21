@@ -386,6 +386,17 @@ extern int NID_id_DateOfExpiry;
 extern int NID_id_CommunityID;
 #define OBJ_id_CommunityID		OBJ_id_AuxiliaryData,3L
 
+#define OBJ_id_CA_FSB			0L, 3L, 0L, 127L, 0L, 7L
+#define OBJ_id_CA_PVS			2L, 2L
+
+#define SN_id_CA_GOST1			"id-CA-GOST1"
+extern int NID_id_CA_GOST;
+#define OBJ_id_CA_GOST1			OBJ_id_CA_PVS, 3L, 2L, 1L
+
+#define SN_id_PK_GOST			"id-PK-GOST"
+extern int NID_id_PK_GOST;
+#define OBJ_id_CA_GOST2			OBJ_id_CA_PVS, 1L, 3L
+
 #endif
 
 #ifdef __cplusplus

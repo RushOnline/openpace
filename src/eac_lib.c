@@ -28,6 +28,7 @@
 #include "ca_lib.h"
 #include "eac_dh.h"
 #include "eac_ecdh.h"
+#include "eac_gost.h"
 #include "eac_err.h"
 #include "eac_lib.h"
 #include "eac_util.h"
@@ -42,6 +43,7 @@
 #include <eac/ta.h>
 #include <openssl/buffer.h>
 #include <openssl/crypto.h>
+#include <openssl/engine.h>
 #include <string.h>
 
 char *cvc_default_dir;
@@ -50,6 +52,19 @@ char *x509_default_dir;
 void EAC_init(void)
 {
     OpenSSL_add_all_algorithms();
+
+#ifndef NO_GOST_ENGINE
+	ENGINE_load_dynamic();
+
+	ENGINE* e = ENGINE_by_id("gost");
+	if (!e) return;
+
+	if (!ENGINE_init(e)) return;
+
+	if (!ENGINE_register_all_complete()) return;
+
+#endif//NO_GOST_ENGINE
+
     EAC_add_all_objects();
     x509_default_dir = X509DIR;
     cvc_default_dir = CVCDIR;
@@ -484,6 +499,15 @@ KA_CTX_set_protocol(KA_CTX *ctx, int protocol)
         ctx->cipher = EVP_aes_256_cbc();
         ctx->enc_keylen = ctx->cipher->key_len;
 
+    } else if (protocol == NID_id_CA_GOST) {
+    	ENGINE* e = ENGINE_by_id("gost");
+        ctx->generate_key = gost_generate_key;
+        ctx->compute_key = gost_compute_key;
+        ctx->mac_keylen = 32;
+        ctx->cmac_ctx = NULL; /* We don't set cmac_ctx, because of potential segfaults */
+        ctx->md = ENGINE_get_digest(e, NID_id_Gost28147_89_MAC);
+        ctx->cipher = ENGINE_get_cipher(e,  NID_id_Gost28147_89);
+        ctx->enc_keylen = EVP_CIPHER_key_length(ctx->cipher);
     } else {
         log_err("Unknown protocol");
         return 0;

@@ -84,8 +84,8 @@ typedef struct ca_info_st {
     ASN1_INTEGER *version;
     /** keyID MAY be used to indicate the local key identifier */
     ASN1_INTEGER *keyID;
-} CA_INFO;
 
+} CA_INFO;
 /** CA Domain parameter structure */
 typedef struct ca_dp_info_st {
     /** OID of the type of domain parameters*/
@@ -364,6 +364,9 @@ aid2pkey(EVP_PKEY **key, ALGORITHM_IDENTIFIER *aid, BN_CTX *bn_ctx)
                     ASN1_INTEGER_get(aid->parameters->value.integer)),
                 "Could not decode standardized domain parameter")
 
+    } else if (nid == NID_id_GostR3410_2001) {
+    	//EVP_PKEY_ASN1_METHOD* parser = ENGINE_get_pkey_asn1_meth(NULL);
+        log_err("%s", "GOST");
     } else {
         OBJ_obj2txt(obj_txt, sizeof obj_txt, aid->algorithm, 0);
         log_err("Unknown Identifier (%s) for %s",
@@ -565,7 +568,8 @@ EAC_CTX_init_ef_cardaccess(const unsigned char * in, size_t in_len,
                 || nid == NID_id_CA_ECDH_3DES_CBC_CBC
                 || nid == NID_id_CA_ECDH_AES_CBC_CMAC_128
                 || nid == NID_id_CA_ECDH_AES_CBC_CMAC_192
-                || nid == NID_id_CA_ECDH_AES_CBC_CMAC_256) {
+                || nid == NID_id_CA_ECDH_AES_CBC_CMAC_256
+				|| nid == NID_id_CA_GOST) {
             /* CAInfo */
             check(d2i_CA_INFO(&tmp_ca_info, &in, info_len),
                     "Could not decode CA info");
@@ -597,7 +601,8 @@ EAC_CTX_init_ef_cardaccess(const unsigned char * in, size_t in_len,
                 goto err;
 
         } else if (nid == NID_id_PK_DH
-                || nid == NID_id_PK_ECDH) {
+                || nid == NID_id_PK_ECDH
+				|| nid == NID_id_PK_GOST) {
             /* ChipAuthenticationPublicKeyInfo */
             check(d2i_CA_PUBLIC_KEY_INFO(&ca_public_key_info, &in, info_len),
                     "Could not decode CA PK domain parameter info");
@@ -676,6 +681,7 @@ EAC_CTX_init_ef_cardaccess(const unsigned char * in, size_t in_len,
             }
 
         } else {
+        	log_err("Registered GOST %d", NID_id_CA_GOST);
             OBJ_obj2txt(obj_txt, sizeof obj_txt, oid, 0);
             log_err("Unknown Identifier (%s) for %s", OBJ_nid2sn(nid),
                     obj_txt);

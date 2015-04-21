@@ -57,6 +57,8 @@ int NID_id_CA_ECDH_3DES_CBC_CBC = NID_undef;
 int NID_id_CA_ECDH_AES_CBC_CMAC_128 = NID_undef;
 int NID_id_CA_ECDH_AES_CBC_CMAC_192 = NID_undef;
 int NID_id_CA_ECDH_AES_CBC_CMAC_256 = NID_undef;
+int NID_id_CA_GOST = NID_undef;
+int NID_id_PK_GOST = NID_undef;
 int NID_id_PACE_DH_GM = NID_undef;
 int NID_id_PACE_DH_GM_3DES_CBC_CBC = NID_undef;
 int NID_id_PACE_DH_GM_AES_CBC_CMAC_128 = NID_undef;
@@ -381,6 +383,12 @@ EAC_add_all_objects(void)
 #define ASC_id_CommunityID		ASC_id_AuxiliaryData".3"
     NID_id_CommunityID = OBJ_create(ASC_id_CommunityID	, SN_id_CommunityID	, SN_id_CommunityID	);
 
+#define ASC_id_CA_GOST1		"0.3.0.127.0.7.2.2.3.2.1"
+    NID_id_CA_GOST = OBJ_create(ASC_id_CA_GOST1	, SN_id_CA_GOST1	, SN_id_CA_GOST1	);
+
+#define ASC_id_PK_GOST		"0.3.0.127.0.7.2.2.1.3"
+    NID_id_PK_GOST = OBJ_create(ASC_id_PK_GOST	, SN_id_PK_GOST	, SN_id_PK_GOST	);
+
     if (NID_undef == NID_standardizedDomainParameters
             || NID_undef == NID_id_PK_DH
             || NID_undef == NID_id_PK_ECDH
@@ -461,7 +469,9 @@ EAC_add_all_objects(void)
             || NID_undef == NID_id_SecurityObject
             || NID_undef == NID_id_DateOfBirth
             || NID_undef == NID_id_DateOfExpiry
-            || NID_undef == NID_id_CommunityID) {
+            || NID_undef == NID_id_CommunityID
+            || NID_undef == NID_id_CA_GOST
+            || NID_undef == NID_id_PK_GOST) {
         log_err("Error adding objects");
     }
 }
